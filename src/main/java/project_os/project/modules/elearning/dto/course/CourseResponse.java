@@ -1,4 +1,4 @@
-package project_os.project.modules.elearning.dto;
+package project_os.project.modules.elearning.dto.course;
 
 import java.time.LocalDateTime;
 import project_os.project.modules.elearning.model.Course;

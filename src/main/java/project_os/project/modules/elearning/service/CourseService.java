@@ -4,10 +4,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import project_os.project.modules.elearning.dto.CourseRequest;
-import project_os.project.modules.elearning.dto.CourseResponse;
+
+import project_os.project.modules.elearning.dao.course.CourseDAO;
+import project_os.project.modules.elearning.dto.course.CourseRequest;
+import project_os.project.modules.elearning.dto.course.CourseResponse;
 import project_os.project.modules.elearning.model.Course;
-import project_os.project.modules.elearning.repository.CourseRepository;
 
 import java.util.List;
 
@@ -15,19 +16,19 @@ import java.util.List;
 @Transactional
 public class CourseService {
 
-    private final CourseRepository courseRepository;
+    private final CourseDAO courseDAO;
 
-    public CourseService(CourseRepository courseRepository) {
-        this.courseRepository = courseRepository;
+    public CourseService(CourseDAO courseDAO) {
+        this.courseDAO = courseDAO;
     }
 
     @Transactional(readOnly = true)
     public List<CourseResponse> getCourses(String keyword) {
         List<Course> courses;
         if (keyword != null && !keyword.trim().isEmpty()) {
-            courses = courseRepository.searchCourses(keyword.trim());
+            courses = courseDAO.searchCourses(keyword.trim());
         } else {
-            courses = courseRepository.findAllByOrderByIdDesc();
+            courses = courseDAO.findAll();
         }
         return courses.stream().map(CourseResponse::fromEntity).toList();
     }
@@ -52,7 +53,7 @@ public class CourseService {
                 request.favourite() != null ? request.favourite().trim() : "",
                 request.isStatus() != null ? request.isStatus() : true
         );
-        Course saved = courseRepository.save(course);
+        Course saved = courseDAO.save(course);
         return CourseResponse.fromEntity(saved);
     }
 
@@ -69,24 +70,24 @@ public class CourseService {
         course.setFavourite(request.favourite() != null ? request.favourite().trim() : "");
         course.setIsStatus(request.isStatus() != null ? request.isStatus() : true);
 
-        Course updated = courseRepository.save(course);
+        Course updated = courseDAO.save(course);
         return CourseResponse.fromEntity(updated);
     }
 
     public CourseResponse patchCourse(Long id, CourseRequest request) {
         Course course = findCourseOrThrow(id);
         request.applyTo(course);
-        Course updated = courseRepository.save(course);
+        Course updated = courseDAO.save(course);
         return CourseResponse.fromEntity(updated);
     }
 
     public void deleteCourse(Long id) {
         Course course = findCourseOrThrow(id);
-        courseRepository.delete(course);
+        courseDAO.delete(course);
     }
 
     private Course findCourseOrThrow(Long id) {
-        return courseRepository.findById(id)
+        return courseDAO.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy dữ liệu với ID: " + id));
     }
 }

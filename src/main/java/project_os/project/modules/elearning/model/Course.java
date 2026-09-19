@@ -5,6 +5,28 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "courses")
+@NamedQueries({
+    @NamedQuery(
+        name = "Course.findAll",
+        query = "SELECT c FROM Course c ORDER BY c.id DESC"
+    ),
+    @NamedQuery(
+        name = "Course.searchCourses",
+        query = "SELECT c FROM Course c WHERE " +
+                "LOWER(c.department) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                "LOWER(c.student) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                "LOWER(c.favourite) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+                "ORDER BY c.id DESC"
+    ),
+    @NamedQuery(
+        name = "Course.countById",
+        query = "SELECT COUNT(c) FROM Course c WHERE c.id = :id"
+    ),
+    @NamedQuery(
+        name = "Course.findById",
+        query = "SELECT c FROM Course c WHERE c.id = :id"
+    )
+})
 public class Course {
 
     @Id

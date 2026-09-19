@@ -1,20 +1,42 @@
 package project_os.project.modules.elearning.model;
 
-import org.hibernate.annotations.DialectOverride.GeneratedColumns;
-
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 
 @Entity 
 @Table (name = "students")
+@NamedQueries({
+    @NamedQuery(
+        name = "Student.findAll",
+        query = "SELECT s FROM Student s ORDER BY s.id DESC"
+    ),
+    @NamedQuery(
+        name = "Student.findByKeyword",
+        query = "SELECT s FROM Student s WHERE " +
+                "LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                "LOWER(s.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+                "ORDER BY s.id DESC"
+    ),
+    @NamedQuery(
+        name = "Student.countById",
+        query = "SELECT COUNT(s) FROM Student s WHERE s.id = :id"
+    )
+})
 public class Student {
     @Id 
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
+    
+    @Column(nullable = false)
     private String email;
 
     public Student() {}

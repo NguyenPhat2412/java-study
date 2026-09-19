@@ -9,8 +9,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import project_os.project.modules.elearning.dto.CourseRequest;
-import project_os.project.modules.elearning.dto.CourseResponse;
+
+import project_os.project.modules.elearning.dto.course.CourseRequest;
+import project_os.project.modules.elearning.dto.course.CourseResponse;
 import project_os.project.modules.elearning.service.CourseService;
 
 import java.time.LocalDateTime;

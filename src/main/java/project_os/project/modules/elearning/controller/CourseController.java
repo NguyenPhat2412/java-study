@@ -3,8 +3,9 @@ package project_os.project.modules.elearning.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import project_os.project.modules.elearning.dto.CourseRequest;
-import project_os.project.modules.elearning.dto.CourseResponse;
+
+import project_os.project.modules.elearning.dto.course.CourseRequest;
+import project_os.project.modules.elearning.dto.course.CourseResponse;
 import project_os.project.modules.elearning.service.CourseService;
 
 import java.util.List;
