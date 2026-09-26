@@ -1,9 +1,10 @@
-package project_os.project.modules.elearning.dao.course;
+package project_os.project.modules.elearning.dao.course.impl;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import org.springframework.stereotype.Repository;
+import project_os.project.modules.elearning.dao.course.CourseDAO;
 import project_os.project.modules.elearning.model.Course;
 
 import java.util.List;

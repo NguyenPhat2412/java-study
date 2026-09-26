@@ -8,9 +8,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import project_os.project.modules.elearning.dao.student.StudentDAO;
-import project_os.project.modules.elearning.dto.student.StudentRequest;
-import project_os.project.modules.elearning.dto.student.StudentResponse;
+import project_os.project.modules.elearning.service.impl.StudentServiceImpl;
 import project_os.project.modules.elearning.model.Student;
+import project_os.project.modules.elearning.wrapper.StudentWrapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +26,7 @@ class StudentServiceTest {
     private StudentDAO studentDAO;
 
     @InjectMocks
-    private StudentService studentService;
+    private StudentServiceImpl studentService;
 
     @Test
     void testGetStudents_All() {
@@ -37,10 +37,10 @@ class StudentServiceTest {
 
         when(studentDAO.findAll()).thenReturn(List.of(s1, s2));
 
-        List<StudentResponse> result = studentService.getStudents(null);
+        List<StudentWrapper> result = studentService.getStudents(null);
 
         assertEquals(2, result.size());
-        assertEquals("Nguyen Van A", result.get(0).name());
+        assertEquals("Nguyen Van A", result.get(0).getName());
         verify(studentDAO, times(1)).findAll();
     }
 
@@ -51,10 +51,10 @@ class StudentServiceTest {
 
         when(studentDAO.findByKeyword("Nguyen")).thenReturn(List.of(s1));
 
-        List<StudentResponse> result = studentService.getStudents("Nguyen");
+        List<StudentWrapper> result = studentService.getStudents("Nguyen");
 
         assertEquals(1, result.size());
-        assertEquals("Nguyen Van A", result.get(0).name());
+        assertEquals("Nguyen Van A", result.get(0).getName());
         verify(studentDAO, times(1)).findByKeyword("Nguyen");
     }
 
@@ -65,11 +65,11 @@ class StudentServiceTest {
 
         when(studentDAO.findById(1L)).thenReturn(Optional.of(s1));
 
-        StudentResponse result = studentService.getStudentById(1L);
+        StudentWrapper result = studentService.getStudentById(1L);
 
         assertNotNull(result);
-        assertEquals(1L, result.id());
-        assertEquals("Nguyen Van A", result.name());
+        assertEquals(1L, result.getId());
+        assertEquals("Nguyen Van A", result.getName());
     }
 
     @Test
@@ -81,25 +81,25 @@ class StudentServiceTest {
 
     @Test
     void testCreateStudent_Success() {
-        StudentRequest req = new StudentRequest("Nguyen Van A", "a@example.com");
+        StudentWrapper req = new StudentWrapper("Nguyen Van A", "a@example.com");
         Student saved = new Student("Nguyen Van A", "a@example.com");
         saved.setId(1L);
 
         when(studentDAO.save(any(Student.class))).thenReturn(saved);
 
-        StudentResponse res = studentService.createStudent(req);
+        StudentWrapper res = studentService.createStudent(req);
 
-        assertEquals(1L, res.id());
-        assertEquals("Nguyen Van A", res.name());
+        assertEquals(1L, res.getId());
+        assertEquals("Nguyen Van A", res.getName());
         verify(studentDAO, times(1)).save(any(Student.class));
     }
 
     @Test
     void testCreateStudent_InvalidInput_ThrowsException() {
-        StudentRequest emptyName = new StudentRequest("", "a@example.com");
+        StudentWrapper emptyName = new StudentWrapper("", "a@example.com");
         assertThrows(ResponseStatusException.class, () -> studentService.createStudent(emptyName));
 
-        StudentRequest emptyEmail = new StudentRequest("Nguyen", "");
+        StudentWrapper emptyEmail = new StudentWrapper("Nguyen", "");
         assertThrows(ResponseStatusException.class, () -> studentService.createStudent(emptyEmail));
     }
 
@@ -108,17 +108,17 @@ class StudentServiceTest {
         Student existing = new Student("Nguyen Van A", "a@example.com");
         existing.setId(1L);
 
-        StudentRequest updateReq = new StudentRequest("Nguyen Van B", "b@example.com");
+        StudentWrapper updateReq = new StudentWrapper("Nguyen Van B", "b@example.com");
         Student updated = new Student("Nguyen Van B", "b@example.com");
         updated.setId(1L);
 
         when(studentDAO.findById(1L)).thenReturn(Optional.of(existing));
         when(studentDAO.save(existing)).thenReturn(updated);
 
-        StudentResponse res = studentService.updateStudent(1L, updateReq);
+        StudentWrapper res = studentService.updateStudent(1L, updateReq);
 
-        assertEquals("Nguyen Van B", res.name());
-        assertEquals("b@example.com", res.email());
+        assertEquals("Nguyen Van B", res.getName());
+        assertEquals("b@example.com", res.getEmail());
     }
 
     @Test
@@ -133,4 +133,3 @@ class StudentServiceTest {
         verify(studentDAO, times(1)).deleteById(1L);
     }
 }
-

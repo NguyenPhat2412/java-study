@@ -8,7 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import project_os.project.modules.elearning.dao.student.StudentDAOImpl;
+import project_os.project.modules.elearning.dao.student.impl.StudentDAOImpl;
 import project_os.project.modules.elearning.model.Student;
 
 import java.util.List;

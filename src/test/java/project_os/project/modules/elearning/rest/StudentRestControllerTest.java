@@ -1,4 +1,4 @@
-package project_os.project.modules.elearning.controller;
+package project_os.project.modules.elearning.rest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,9 +9,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import project_os.project.modules.elearning.dto.student.StudentRequest;
-import project_os.project.modules.elearning.dto.student.StudentResponse;
 import project_os.project.modules.elearning.service.StudentService;
+import project_os.project.modules.elearning.wrapper.StudentWrapper;
 
 import java.util.List;
 
@@ -22,7 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-class StudentControllerTest {
+class StudentRestControllerTest {
 
     private MockMvc mockMvc;
 
@@ -30,19 +29,19 @@ class StudentControllerTest {
     private StudentService studentService;
 
     @InjectMocks
-    private StudentController studentController;
+    private StudentRestController studentRestController;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(studentController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(studentRestController).build();
     }
 
     @Test
     void testGetStudents() throws Exception {
-        StudentResponse res = new StudentResponse(1L, "Nguyen Van A", "a@example.com");
+        StudentWrapper res = new StudentWrapper(1L, "Nguyen Van A", "a@example.com");
         when(studentService.getStudents(null)).thenReturn(List.of(res));
 
-        mockMvc.perform(get("/api/students"))
+        mockMvc.perform(get(RestEndpoint.STUDENTS))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].id").value(1))
@@ -53,10 +52,10 @@ class StudentControllerTest {
 
     @Test
     void testGetStudentById() throws Exception {
-        StudentResponse res = new StudentResponse(1L, "Nguyen Van A", "a@example.com");
+        StudentWrapper res = new StudentWrapper(1L, "Nguyen Van A", "a@example.com");
         when(studentService.getStudentById(1L)).thenReturn(res);
 
-        mockMvc.perform(get("/api/students/1"))
+        mockMvc.perform(get(RestEndpoint.STUDENTS + "/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Nguyen Van A"));
@@ -64,9 +63,9 @@ class StudentControllerTest {
 
     @Test
     void testCreateStudent() throws Exception {
-        StudentResponse res = new StudentResponse(1L, "Nguyen Van A", "a@example.com");
+        StudentWrapper res = new StudentWrapper(1L, "Nguyen Van A", "a@example.com");
 
-        when(studentService.createStudent(any(StudentRequest.class))).thenReturn(res);
+        when(studentService.createStudent(any(StudentWrapper.class))).thenReturn(res);
 
         String jsonPayload = """
                 {
@@ -75,7 +74,7 @@ class StudentControllerTest {
                 }
                 """;
 
-        mockMvc.perform(post("/api/students")
+        mockMvc.perform(post(RestEndpoint.STUDENTS)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
                 .andExpect(status().isCreated())
@@ -85,9 +84,9 @@ class StudentControllerTest {
 
     @Test
     void testUpdateStudent() throws Exception {
-        StudentResponse res = new StudentResponse(1L, "Nguyen Van B", "b@example.com");
+        StudentWrapper res = new StudentWrapper(1L, "Nguyen Van B", "b@example.com");
 
-        when(studentService.updateStudent(eq(1L), any(StudentRequest.class))).thenReturn(res);
+        when(studentService.updateStudent(eq(1L), any(StudentWrapper.class))).thenReturn(res);
 
         String jsonPayload = """
                 {
@@ -96,7 +95,7 @@ class StudentControllerTest {
                 }
                 """;
 
-        mockMvc.perform(put("/api/students/1")
+        mockMvc.perform(put(RestEndpoint.STUDENTS + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
                 .andExpect(status().isOk())
@@ -105,7 +104,7 @@ class StudentControllerTest {
 
     @Test
     void testDeleteStudent() throws Exception {
-        mockMvc.perform(delete("/api/students/1"))
+        mockMvc.perform(delete(RestEndpoint.STUDENTS + "/1"))
                 .andExpect(status().isNoContent());
 
         verify(studentService, times(1)).deleteStudent(1L);

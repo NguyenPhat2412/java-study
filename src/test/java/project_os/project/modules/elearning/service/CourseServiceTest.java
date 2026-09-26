@@ -8,9 +8,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import project_os.project.modules.elearning.dao.course.CourseDAO;
-import project_os.project.modules.elearning.dto.course.CourseRequest;
-import project_os.project.modules.elearning.dto.course.CourseResponse;
+import project_os.project.modules.elearning.service.impl.CourseServiceImpl;
 import project_os.project.modules.elearning.model.Course;
+import project_os.project.modules.elearning.wrapper.CourseWrapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +26,7 @@ class CourseServiceTest {
     private CourseDAO courseDAO;
 
     @InjectMocks
-    private CourseService courseService;
+    private CourseServiceImpl courseService;
 
     // lấy toàn bộ khoá học
     @Test
@@ -38,11 +38,11 @@ class CourseServiceTest {
 
         when(courseDAO.findAll()).thenReturn(List.of(course1, course2));
 
-        List<CourseResponse> result = courseService.getCourses(null);
+        List<CourseWrapper> result = courseService.getCourses(null);
 
         assertEquals(2, result.size());
-        assertEquals("CNTT", result.get(0).department());
-        assertEquals("Điện Tử", result.get(1).department());
+        assertEquals("CNTT", result.get(0).getDepartment());
+        assertEquals("Điện Tử", result.get(1).getDepartment());
         verify(courseDAO, times(1)).findAll();
     }
 
@@ -53,10 +53,10 @@ class CourseServiceTest {
 
         when(courseDAO.searchCourses("Phát")).thenReturn(List.of(course));
 
-        List<CourseResponse> result = courseService.getCourses("Phát");
+        List<CourseWrapper> result = courseService.getCourses("Phát");
 
         assertEquals(1, result.size());
-        assertEquals("Nguyễn Văn Phát", result.get(0).student());
+        assertEquals("Nguyễn Văn Phát", result.get(0).getStudent());
         verify(courseDAO, times(1)).searchCourses("Phát");
     }
 
@@ -67,11 +67,11 @@ class CourseServiceTest {
 
         when(courseDAO.findById(1L)).thenReturn(Optional.of(course));
 
-        CourseResponse result = courseService.getCourseById(1L);
+        CourseWrapper result = courseService.getCourseById(1L);
 
         assertNotNull(result);
-        assertEquals(1L, result.id());
-        assertEquals("Nguyễn Văn Phát", result.student());
+        assertEquals(1L, result.getId());
+        assertEquals("Nguyễn Văn Phát", result.getStudent());
         verify(courseDAO, times(1)).findById(1L);
     }
 
@@ -85,25 +85,25 @@ class CourseServiceTest {
 
     @Test
     void testCreateCourse_Success() {
-        CourseRequest request = new CourseRequest("CNTT", "Lê Hoàng", "Khung UAV", true);
+        CourseWrapper request = new CourseWrapper("CNTT", "Lê Hoàng", "Khung UAV", true);
         Course saved = new Course("CNTT", "Lê Hoàng", "Khung UAV", true);
         saved.setId(10L);
 
         when(courseDAO.save(any(Course.class))).thenReturn(saved);
 
-        CourseResponse result = courseService.createCourse(request);
+        CourseWrapper result = courseService.createCourse(request);
 
         assertNotNull(result);
-        assertEquals(10L, result.id());
-        assertEquals("CNTT", result.department());
-        assertEquals("Lê Hoàng", result.student());
-        assertTrue(result.isStatus());
+        assertEquals(10L, result.getId());
+        assertEquals("CNTT", result.getDepartment());
+        assertEquals("Lê Hoàng", result.getStudent());
+        assertTrue(result.getIsStatus());
         verify(courseDAO, times(1)).save(any(Course.class));
     }
 
     @Test
     void testCreateCourse_EmptyDepartment_ThrowsException() {
-        CourseRequest request = new CourseRequest("", "Lê Hoàng", "Khung UAV", true);
+        CourseWrapper request = new CourseWrapper("", "Lê Hoàng", "Khung UAV", true);
 
         assertThrows(ResponseStatusException.class, () -> courseService.createCourse(request));
         verify(courseDAO, never()).save(any());
@@ -114,17 +114,17 @@ class CourseServiceTest {
         Course existing = new Course("CNTT", "Nguyễn Văn Phát", "Drone", true);
         existing.setId(1L);
 
-        CourseRequest updateRequest = new CourseRequest("Cơ Khí", "Nguyễn Văn Phát", "Vỏ UAV", false);
+        CourseWrapper updateRequest = new CourseWrapper("Cơ Khí", "Nguyễn Văn Phát", "Vỏ UAV", false);
 
         when(courseDAO.findById(1L)).thenReturn(Optional.of(existing));
         when(courseDAO.save(any(Course.class))).thenReturn(existing);
 
-        CourseResponse result = courseService.updateCourse(1L, updateRequest);
+        CourseWrapper result = courseService.updateCourse(1L, updateRequest);
 
         assertNotNull(result);
-        assertEquals("Cơ Khí", result.department());
-        assertEquals("Vỏ UAV", result.favourite());
-        assertFalse(result.isStatus());
+        assertEquals("Cơ Khí", result.getDepartment());
+        assertEquals("Vỏ UAV", result.getFavourite());
+        assertFalse(result.getIsStatus());
         verify(courseDAO, times(1)).save(existing);
     }
 

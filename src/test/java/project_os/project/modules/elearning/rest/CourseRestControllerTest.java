@@ -1,4 +1,4 @@
-package project_os.project.modules.elearning.controller;
+package project_os.project.modules.elearning.rest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,12 +9,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import project_os.project.modules.elearning.dto.course.CourseRequest;
-import project_os.project.modules.elearning.dto.course.CourseResponse;
 import project_os.project.modules.elearning.service.CourseService;
+import project_os.project.modules.elearning.wrapper.CourseWrapper;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -24,7 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-class CourseControllerTest {
+class CourseRestControllerTest {
 
     private MockMvc mockMvc;
 
@@ -32,19 +29,19 @@ class CourseControllerTest {
     private CourseService courseService;
 
     @InjectMocks
-    private CourseController courseController;
+    private CourseRestController courseRestController;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(courseController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(courseRestController).build();
     }
 
     @Test
     void testGetCourses_Returns200AndJsonArray() throws Exception {
-        CourseResponse res = new CourseResponse(1L, "CNTT", "Nguyễn Văn Phát", "Drone AI", true, LocalDateTime.now(), LocalDateTime.now());
+        CourseWrapper res = new CourseWrapper(1L, "CNTT", "Nguyễn Văn Phát", "Drone AI", true);
         when(courseService.getCourses(null)).thenReturn(List.of(res));
 
-        mockMvc.perform(get("/api/courses"))
+        mockMvc.perform(get(RestEndpoint.COURSES))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].id").value(1))
@@ -56,10 +53,10 @@ class CourseControllerTest {
 
     @Test
     void testGetCourseById_Returns200() throws Exception {
-        CourseResponse res = new CourseResponse(1L, "CNTT", "Nguyễn Văn Phát", "Drone AI", true, LocalDateTime.now(), LocalDateTime.now());
+        CourseWrapper res = new CourseWrapper(1L, "CNTT", "Nguyễn Văn Phát", "Drone AI", true);
         when(courseService.getCourseById(1L)).thenReturn(res);
 
-        mockMvc.perform(get("/api/courses/1"))
+        mockMvc.perform(get(RestEndpoint.COURSES + "/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.student").value("Nguyễn Văn Phát"));
@@ -69,8 +66,8 @@ class CourseControllerTest {
 
     @Test
     void testCreateCourse_Returns201Created() throws Exception {
-        CourseResponse created = new CourseResponse(5L, "Điện Tử", "Lê Thị B", "IoT", true, LocalDateTime.now(), LocalDateTime.now());
-        when(courseService.createCourse(any(CourseRequest.class))).thenReturn(created);
+        CourseWrapper created = new CourseWrapper(5L, "Điện Tử", "Lê Thị B", "IoT", true);
+        when(courseService.createCourse(any(CourseWrapper.class))).thenReturn(created);
 
         String jsonPayload = """
                 {
@@ -81,20 +78,20 @@ class CourseControllerTest {
                 }
                 """;
 
-        mockMvc.perform(post("/api/courses")
+        mockMvc.perform(post(RestEndpoint.COURSES)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(5))
                 .andExpect(jsonPath("$.department").value("Điện Tử"));
 
-        verify(courseService, times(1)).createCourse(any(CourseRequest.class));
+        verify(courseService, times(1)).createCourse(any(CourseWrapper.class));
     }
 
     @Test
     void testUpdateCourse_Returns200() throws Exception {
-        CourseResponse updated = new CourseResponse(1L, "Cơ Khí", "Nguyễn Văn Phát", "Vỏ UAV", true, LocalDateTime.now(), LocalDateTime.now());
-        when(courseService.updateCourse(eq(1L), any(CourseRequest.class))).thenReturn(updated);
+        CourseWrapper updated = new CourseWrapper(1L, "Cơ Khí", "Nguyễn Văn Phát", "Vỏ UAV", true);
+        when(courseService.updateCourse(eq(1L), any(CourseWrapper.class))).thenReturn(updated);
 
         String jsonPayload = """
                 {
@@ -105,19 +102,19 @@ class CourseControllerTest {
                 }
                 """;
 
-        mockMvc.perform(put("/api/courses/1")
+        mockMvc.perform(put(RestEndpoint.COURSES + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.department").value("Cơ Khí"));
 
-        verify(courseService, times(1)).updateCourse(eq(1L), any(CourseRequest.class));
+        verify(courseService, times(1)).updateCourse(eq(1L), any(CourseWrapper.class));
     }
 
     @Test
     void testPatchCourse_Returns200() throws Exception {
-        CourseResponse patched = new CourseResponse(1L, "CNTT", "Nguyễn Văn Phát", "Drone AI", false, LocalDateTime.now(), LocalDateTime.now());
-        when(courseService.patchCourse(eq(1L), any(CourseRequest.class))).thenReturn(patched);
+        CourseWrapper patched = new CourseWrapper(1L, "CNTT", "Nguyễn Văn Phát", "Drone AI", false);
+        when(courseService.patchCourse(eq(1L), any(CourseWrapper.class))).thenReturn(patched);
 
         String jsonPayload = """
                 {
@@ -125,20 +122,20 @@ class CourseControllerTest {
                 }
                 """;
 
-        mockMvc.perform(patch("/api/courses/1")
+        mockMvc.perform(patch(RestEndpoint.COURSES + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonPayload))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isStatus").value(false));
 
-        verify(courseService, times(1)).patchCourse(eq(1L), any(CourseRequest.class));
+        verify(courseService, times(1)).patchCourse(eq(1L), any(CourseWrapper.class));
     }
 
     @Test
     void testDeleteCourse_Returns204NoContent() throws Exception {
         doNothing().when(courseService).deleteCourse(1L);
 
-        mockMvc.perform(delete("/api/courses/1"))
+        mockMvc.perform(delete(RestEndpoint.COURSES + "/1"))
                 .andExpect(status().isNoContent());
 
         verify(courseService, times(1)).deleteCourse(1L);

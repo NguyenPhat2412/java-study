@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import project_os.project.modules.elearning.dao.course.CourseDAOImpl;
+import project_os.project.modules.elearning.dao.course.impl.CourseDAOImpl;
 import project_os.project.modules.elearning.model.Course;
 
 import java.util.List;
