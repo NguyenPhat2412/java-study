@@ -3,7 +3,7 @@ package project_os.project.modules.elearning.service.impl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import project_os.project.modules.elearning.common.CoreContants;
+import project_os.project.modules.elearning.common.CoreConstants;
 import project_os.project.modules.elearning.common.SystemException;
 import project_os.project.modules.elearning.dao.student.StudentDAO;
 import project_os.project.modules.elearning.service.StudentService;
@@ -12,6 +12,7 @@ import project_os.project.modules.elearning.wrapper.StudentWrapper;
 
 import java.util.List;
 
+/** Application service điều phối các use case của Student. */
 @Service
 @Transactional
 public class StudentServiceImpl implements StudentService {
@@ -45,8 +46,7 @@ public class StudentServiceImpl implements StudentService {
     public StudentWrapper createStudent(StudentWrapper wrapper) {
         validate(wrapper);
 
-        Student student = new Student();
-        mapWrapperToEntity(wrapper, student);
+        Student student = new Student(wrapper.getName(), wrapper.getEmail());
 
         Student saved = studentDAO.save(student);
         return StudentWrapper.fromEntity(saved);
@@ -57,7 +57,7 @@ public class StudentServiceImpl implements StudentService {
         Student student = findStudentOrThrow(id);
         validate(wrapper);
 
-        mapWrapperToEntity(wrapper, student);
+        student.updateContactInformation(wrapper.getName(), wrapper.getEmail());
 
         Student updated = studentDAO.save(student);
         return StudentWrapper.fromEntity(updated);
@@ -71,10 +71,10 @@ public class StudentServiceImpl implements StudentService {
         }
 
         if (wrapper.getName() != null && !wrapper.getName().trim().isEmpty()) {
-            student.setName(wrapper.getName().trim());
+            student.changeName(wrapper.getName());
         }
         if (wrapper.getEmail() != null && !wrapper.getEmail().trim().isEmpty()) {
-            student.setEmail(wrapper.getEmail().trim());
+            student.changeEmail(wrapper.getEmail());
         }
 
         Student updated = studentDAO.save(student);
@@ -99,13 +99,8 @@ public class StudentServiceImpl implements StudentService {
         }
     }
 
-    private void mapWrapperToEntity(StudentWrapper wrapper, Student student) {
-        student.setName(wrapper.getName().trim());
-        student.setEmail(wrapper.getEmail().trim());
-    }
-
     private Student findStudentOrThrow(Long id) {
         return studentDAO.findById(id)
-                .orElseThrow(() -> SystemException.notFound(CoreContants.STUDENT_NOT_FOUND + " với ID: " + id));
+                .orElseThrow(() -> SystemException.notFound(CoreConstants.STUDENT_NOT_FOUND + " với ID: " + id));
     }
 }

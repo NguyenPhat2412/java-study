@@ -1,8 +1,14 @@
 package project_os.project.modules.elearning.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
+/**
+ * Entity miền nghiệp vụ của khóa học.
+ *
+ * Entity tự giữ các quy tắc để một Course luôn hợp lệ. Đây là ý tưởng OOP
+ * chính trong lần refactor này: bên ngoài yêu cầu object thực hiện hành vi
+ * thay vì sửa từng field từ bên ngoài.
+ */
 @Entity
 @Table(name = "courses")
 @NamedQueries({
@@ -27,11 +33,7 @@ import java.time.LocalDateTime;
         query = "SELECT c FROM Course c WHERE c.id = :id"
     )
 })
-public class Course {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Course extends BaseEntity {
 
     @Column(nullable = false)
     private String department;
@@ -44,77 +46,75 @@ public class Course {
     @Column(name = "is_status", nullable = false)
     private Boolean isStatus = true;
 
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    public Course() {}
+    /**
+     * JPA cần constructor không tham số. Để protected giúp code nghiệp vụ
+     * phải tạo Course bằng constructor có ý nghĩa nghiệp vụ.
+     */
+    protected Course() {}
 
     public Course(String department, String student, String favourite, Boolean isStatus) {
-        this.department = department;
-        this.student = student;
-        this.favourite = favourite;
+        updateInformation(department, student, favourite);
         this.isStatus = isStatus != null ? isStatus : true;
     }
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+    /**
+     * Thay đổi toàn bộ thông tin người dùng được phép sửa trong một thao tác.
+     * Đặt hành vi ở entity giúp các use case mới không tạo ra state sai.
+     */
+    public void updateInformation(String department, String student, String favourite) {
+        this.department = requireText(department, "Khoa (Department)");
+        this.student = requireText(student, "Tên sinh viên (Student)");
+        // favourite null nghĩa là giữ nguyên khi update.
+        // Entity mới vẫn nhận giá trị mặc định là chuỗi rỗng.
+        if (favourite != null) {
+            this.favourite = normalizeOptional(favourite);
+        } else if (this.favourite == null) {
+            this.favourite = "";
+        }
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+    public void changeDepartment(String department) {
+        this.department = requireText(department, "Khoa (Department)");
     }
 
-    public Long getId() {
-        return id;
+    public void changeStudent(String student) {
+        this.student = requireText(student, "Tên sinh viên (Student)");
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void changeFavourite(String favourite) {
+        this.favourite = normalizeOptional(favourite);
+    }
+
+    /** Boolean null từ HTTP request được chuyển thành giá trị mặc định an toàn. */
+    public void changeStatus(Boolean status) {
+        this.isStatus = status != null ? status : true;
+    }
+
+    private static String requireText(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " không được để trống");
+        }
+        return value.trim();
+    }
+
+    private static String normalizeOptional(String value) {
+        return value == null ? "" : value.trim();
     }
 
     public String getDepartment() {
         return department;
     }
 
-    public void setDepartment(String department) {
-        this.department = department;
-    }
-
     public String getStudent() {
         return student;
-    }
-
-    public void setStudent(String student) {
-        this.student = student;
     }
 
     public String getFavourite() {
         return favourite;
     }
 
-    public void setFavourite(String favourite) {
-        this.favourite = favourite;
-    }
-
     public Boolean getIsStatus() {
         return isStatus;
     }
 
-    public void setIsStatus(Boolean isStatus) {
-        this.isStatus = isStatus;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
 }

@@ -5,9 +5,9 @@ package project_os.project.modules.elearning.common;
  * - Thông báo lỗi mặc định (Messages)
  * - Trạng thái hệ thống (Status)
  */
-public class CoreContants {
+public class CoreConstants {
 
-    private CoreContants() {
+    private CoreConstants() {
         // Ngăn việc tạo instance
     }
 

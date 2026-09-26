@@ -36,12 +36,10 @@ public class CourseWrapper {
     }
 
     public Course toEntity() {
-        Course course = new Course();
+        // Mapping đi qua constructor của domain để Course tự từ chối dữ liệu
+        // sai, thay vì tạo entity không hợp lệ trước.
+        Course course = new Course(this.department, this.student, this.favourite, this.isStatus);
         course.setId(this.id);
-        course.setDepartment(this.department != null ? this.department.trim() : null);
-        course.setStudent(this.student != null ? this.student.trim() : null);
-        course.setFavourite(this.favourite != null ? this.favourite.trim() : null);
-        course.setIsStatus(this.isStatus != null ? this.isStatus : true);
         return course;
     }
 

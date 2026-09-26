@@ -36,10 +36,9 @@ public class StudentWrapper {
     }
 
     public Student toEntity() {
-        Student student = new Student();
+        // Constructor domain chịu trách nhiệm validation và chuẩn hóa dữ liệu.
+        Student student = new Student(this.name, this.email);
         student.setId(this.id);
-        student.setName(this.name != null ? this.name.trim() : null);
-        student.setEmail(this.email != null ? this.email.trim() : null);
         return student;
     }
 

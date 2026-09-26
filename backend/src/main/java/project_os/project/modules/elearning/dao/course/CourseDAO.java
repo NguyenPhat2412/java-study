@@ -5,6 +5,13 @@ import project_os.project.modules.elearning.model.Course;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Abstraction persistence của Course.
+ *
+ * Service phụ thuộc interface này thay vì EntityManager. Đây là Dependency
+ * Inversion: business layer không phụ thuộc implementation database và có
+ * thể test bằng mock DAO.
+ */
 public interface CourseDAO {
     List<Course> findAll();
     Optional<Course> findById(Long id);
@@ -14,4 +21,3 @@ public interface CourseDAO {
     void deleteById(Long id);
     boolean existsById(Long id);
 }
-

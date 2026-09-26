@@ -3,7 +3,7 @@ package project_os.project.modules.elearning.service.impl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import project_os.project.modules.elearning.common.CoreContants;
+import project_os.project.modules.elearning.common.CoreConstants;
 import project_os.project.modules.elearning.common.SystemException;
 import project_os.project.modules.elearning.dao.course.CourseDAO;
 import project_os.project.modules.elearning.service.CourseService;
@@ -12,6 +12,10 @@ import project_os.project.modules.elearning.wrapper.CourseWrapper;
 
 import java.util.List;
 
+/**
+ * Application service: điều phối use case và giao việc thay đổi state cho
+ * Course. Service không sửa trực tiếp field của entity.
+ */
 @Service
 @Transactional
 public class CourseServiceImpl implements CourseService {
@@ -44,8 +48,12 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public CourseWrapper createCourse(CourseWrapper wrapper) {
         validate(wrapper);
-        Course course = new Course();
-        mapWrapperToEntity(wrapper, course);
+        Course course = new Course(
+                wrapper.getDepartment(),
+                wrapper.getStudent(),
+                wrapper.getFavourite(),
+                wrapper.getIsStatus()
+        );
         Course saved = courseDAO.save(course);
         return CourseWrapper.fromEntity(saved);
     }
@@ -54,7 +62,14 @@ public class CourseServiceImpl implements CourseService {
     public CourseWrapper updateCourse(Long id, CourseWrapper wrapper) {
         Course course = findCourseOrThrow(id);
         validate(wrapper);
-        mapWrapperToEntity(wrapper, course);
+        course.updateInformation(
+                wrapper.getDepartment(),
+                wrapper.getStudent(),
+                wrapper.getFavourite()
+        );
+        if (wrapper.getIsStatus() != null) {
+            course.changeStatus(wrapper.getIsStatus());
+        }
 
         Course updated = courseDAO.save(course);
         return CourseWrapper.fromEntity(updated);
@@ -67,16 +82,16 @@ public class CourseServiceImpl implements CourseService {
             throw SystemException.badRequest("Dữ liệu không được để trống");
         }
         if (wrapper.getDepartment() != null && !wrapper.getDepartment().trim().isEmpty()) {
-            course.setDepartment(wrapper.getDepartment().trim());
+            course.changeDepartment(wrapper.getDepartment());
         }
         if (wrapper.getStudent() != null && !wrapper.getStudent().trim().isEmpty()) {
-            course.setStudent(wrapper.getStudent().trim());
+            course.changeStudent(wrapper.getStudent());
         }
         if (wrapper.getFavourite() != null) {
-            course.setFavourite(wrapper.getFavourite().trim());
+            course.changeFavourite(wrapper.getFavourite());
         }
         if (wrapper.getIsStatus() != null) {
-            course.setIsStatus(wrapper.getIsStatus());
+            course.changeStatus(wrapper.getIsStatus());
         }
         Course updated = courseDAO.save(course);
         return CourseWrapper.fromEntity(updated);
@@ -100,25 +115,8 @@ public class CourseServiceImpl implements CourseService {
         }
     }
 
-    private void mapWrapperToEntity(CourseWrapper wrapper, Course course) {
-        course.setDepartment(wrapper.getDepartment().trim());
-        course.setStudent(wrapper.getStudent().trim());
-        if (wrapper.getFavourite() != null) {
-            course.setFavourite(wrapper.getFavourite().trim());
-        }
-        if (wrapper.getIsStatus() != null) {
-            course.setIsStatus(wrapper.getIsStatus());
-        }
-        if (course.getFavourite() == null) {
-            course.setFavourite("");
-        }
-        if (course.getIsStatus() == null) {
-            course.setIsStatus(true);
-        }
-    }
-
     private Course findCourseOrThrow(Long id) {
         return courseDAO.findById(id)
-                .orElseThrow(() -> SystemException.notFound(CoreContants.COURSE_NOT_FOUND + " với ID: " + id));
+                .orElseThrow(() -> SystemException.notFound(CoreConstants.COURSE_NOT_FOUND + " với ID: " + id));
     }
 }
