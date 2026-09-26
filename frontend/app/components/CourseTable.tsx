@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Course } from "../types";
+import { Course, Student } from "../types";
 import { courseApi } from "../services/api";
 import {
   Search,
@@ -28,7 +28,7 @@ export default function CourseTable({
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [formData, setFormData] = useState<Omit<Course, "id">>({
     department: "",
-    student: "",
+    student: null,
     favourite: "",
     isStatus: true,
   });
