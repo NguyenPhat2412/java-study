@@ -28,7 +28,7 @@ export default function CourseTable({
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [formData, setFormData] = useState<Omit<Course, "id">>({
     department: "",
-    student: null,
+    student: null as unknown as Student,
     favourite: "",
     isStatus: true,
   });
@@ -79,7 +79,7 @@ export default function CourseTable({
     setEditingCourse(null);
     setFormData({
       department: "",
-      student: "",
+      student: null as unknown as Student,
       favourite: "",
       isStatus: true,
     });
@@ -99,7 +99,7 @@ export default function CourseTable({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.department.trim() || !formData.student.trim()) {
+    if (!formData.department.trim() || !formData.student?.name.trim()) {
       alert("Vui lòng điền đầy đủ Khoa và Tên sinh viên");
       return;
     }
@@ -230,7 +230,7 @@ export default function CourseTable({
                 <tr key={course.id} className="hover:bg-slate-50/80 transition-colors">
                   <td className="py-3 px-4 font-mono text-xs text-slate-500">{course.id}</td>
                   <td className="py-3 px-4 font-medium text-slate-900">{course.department}</td>
-                  <td className="py-3 px-4 text-slate-800">{course.student}</td>
+                  <td className="py-3 px-4 text-slate-800">{course.student?.name || <span className="text-slate-400 italic">Chưa có sinh viên</span>}</td>
                   <td className="py-3 px-4 text-slate-600">
                     {course.favourite || <span className="text-slate-400 italic">Không có</span>}
                   </td>
@@ -314,8 +314,17 @@ export default function CourseTable({
                   type="text"
                   required
                   placeholder="Ví dụ: Nguyễn Văn A..."
-                  value={formData.student}
-                  onChange={(e) => setFormData({ ...formData, student: e.target.value })}
+                  value={formData.student?.name || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      student: {
+                        id: formData.student?.id ?? 0,
+                        email: formData.student?.email ?? "",
+                        name: e.target.value,
+                      },
+                    })
+                  }
                   className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

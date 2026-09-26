@@ -7,7 +7,7 @@ export interface Student {
 export interface Course {
     id: number;
     department: string;
-    student: Student;
+    student: Student | null;
     favourite: string;
     isStatus: boolean;
 }
